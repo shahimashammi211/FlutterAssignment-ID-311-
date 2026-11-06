@@ -1,0 +1,2776 @@
+
+E:\myapp311>(
+echo. 
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\app.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\app.dart" 
+) 
+
+==================================================
+FILE: E:\myapp311\lib\app.dart
+==================================================
+
+E:\myapp311>(
+echo. 
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\main.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\main.dart" 
+) 
+
+==================================================
+FILE: E:\myapp311\lib\main.dart
+==================================================
+
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'auth/auth_gate.dart';
+import 'theme/app_theme.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'YOUR_SUPABASE_URL',
+    anonKey: 'YOUR_SUPABASE_ANON_KEY',
+  );
+
+  runApp(const AqilexaApp());
+}
+
+class AqilexaApp extends StatelessWidget {
+  const AqilexaApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Aqilexa',
+      theme: AppTheme.lightTheme,
+      themeMode: ThemeMode.light,
+      home: const AuthGate(),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\auth\auth_gate.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\auth\auth_gate.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\auth\auth_gate.dart
+==================================================
+
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../screens/home_screen.dart';
+import '../screens/login_screen.dart';
+import '../screens/reset_password_screen.dart';
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<AuthState>(
+      stream: Supabase.instance.client.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        final event = snapshot.data?.event;
+
+        if (event == AuthChangeEvent.passwordRecovery) {
+          return const ResetPasswordScreen();
+        }
+
+        final session =
+            Supabase.instance.client.auth.currentSession;
+
+        if (snapshot.connectionState ==
+                ConnectionState.waiting &&
+            session == null) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (session != null) {
+          return const HomeScreen();
+        }
+
+        return const LoginScreen();
+      },
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\auth\auth_service.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\auth\auth_service.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\auth\auth_service.dart
+==================================================
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../services/supabase_service.dart';
+
+class AuthService {
+  final SupabaseClient supabase = SupabaseService.client;
+
+  User? get currentUser => supabase.auth.currentUser;
+
+  Future<AuthResponse> signUp({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    return await supabase.auth.signUp(
+      email: email.trim(),
+      password: password,
+      data: {'name': name.trim()},
+    );
+  }
+
+  Future<AuthResponse> signIn({
+    required String email,
+    required String password,
+  }) async {
+    return await supabase.auth.signInWithPassword(
+      email: email.trim(),
+      password: password,
+    );
+  }
+
+  Future<bool> signInWithGoogle() async {
+    return await supabase.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: 'aqilexa://login-callback/',
+    );
+  }
+
+  Future<void> signOut() async {
+    await supabase.auth.signOut();
+  }
+}
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\config\supabase_config.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\config\supabase_config.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\config\supabase_config.dart
+==================================================
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\routes\app_routes.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\routes\app_routes.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\routes\app_routes.dart
+==================================================
+
+import 'package:flutter/material.dart';
+
+import '../screens/welcome_screen.dart';
+import '../screens/login_screen.dart';
+import '../screens/signup_screen.dart';
+import '../screens/home_screen.dart';
+import '../screens/note_screen.dart';
+import '../screens/upload_screen.dart';
+import '../screens/profile_screen.dart';
+
+class AppRoutes {
+  static const String welcome = '/welcome';
+  static const String login = '/login';
+  static const String signup = '/signup';
+  static const String home = '/home';
+  static const String notes = '/notes';
+  static const String upload = '/upload';
+  static const String profile = '/profile';
+
+  static Map<String, WidgetBuilder> routes = {
+    welcome: (context) => const WelcomeScreen(),
+    login: (context) => const LoginScreen(),
+    signup: (context) => const SignupScreen(),
+    home: (context) => const HomeScreen(),
+    notes: (context) => const NoteScreen(),
+    upload: (context) => const UploadScreen(),
+    profile: (context) => const ProfileScreen(),
+  };
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\screens\forgot_password_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\screens\forgot_password_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\screens\forgot_password_screen.dart
+==================================================
+
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../theme/app_colors.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/custom_textfield.dart';
+
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
+
+  @override
+  State<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState
+    extends State<ForgotPasswordScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final emailController = TextEditingController();
+
+  bool isLoading = false;
+
+  Future<void> sendResetLink() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await Supabase.instance.client.auth.resetPasswordForEmail(
+        emailController.text.trim(),
+        redirectTo: 'aqilexa://reset-password',
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'If the account exists, a reset email will be sent.',
+          ),
+        ),
+      );
+    } on AuthException catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something went wrong: $error'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Forgot Password'),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 35),
+
+                const Center(
+                  child: Icon(
+                    Icons.lock_reset,
+                    size: 90,
+                    color: AppColors.primary,
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                const Text(
+                  'Reset Your Password',
+                  style: TextStyle(
+                    fontSize: 27,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                const Text(
+                  'Enter your registered email address. '
+                  'We will send you a password reset link.',
+                  style: TextStyle(
+                    color: AppColors.grayText,
+                    fontSize: 15,
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                const Text('Email Address'),
+
+                const SizedBox(height: 8),
+
+                CustomTextField(
+                  hintText: 'Enter your email',
+                  controller: emailController,
+                  prefixIcon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your email';
+                    }
+
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$')
+                        .hasMatch(value.trim())) {
+                      return 'Enter a valid email address';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 28),
+
+                CustomButton(
+                  text: 'Send Reset Link',
+                  isLoading: isLoading,
+                  onPressed: sendResetLink,
+                ),
+
+                const SizedBox(height: 20),
+
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Back to Login'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\screens\home_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\screens\home_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\screens\home_screen.dart
+==================================================
+
+import 'package:flutter/material.dart';
+
+import '../auth/auth_service.dart';
+import '../routes/app_routes.dart';
+import '../theme/app_colors.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  Future<void> signOut(BuildContext context) async {
+    try {
+      await AuthService().signOut();
+
+      if (!context.mounted) return;
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Logout failed: $error')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = AuthService().currentUser;
+    final userName =
+        user?.userMetadata?['name']?.toString() ?? 'User';
+    final email = user?.email ?? '';
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Aqilexa',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.profile);
+            },
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Profile',
+          ),
+        ],
+      ),
+
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            children: [
+              UserAccountsDrawerHeader(
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                ),
+                accountName: Text(userName),
+                accountEmail: Text(email),
+                currentAccountPicture: const CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Icon(
+                    Icons.person,
+                    size: 38,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.dashboard_outlined),
+                title: const Text('Dashboard'),
+                onTap: () => Navigator.pop(context),
+              ),
+              ListTile(
+                leading: const Icon(Icons.note_alt_outlined),
+                title: const Text('My Notes'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, AppRoutes.notes);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cloud_upload_outlined),
+                title: const Text('Upload Image'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, AppRoutes.upload);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.person_outline),
+                title: const Text('My Profile'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, AppRoutes.profile);
+                },
+              ),
+              const Spacer(),
+              const Divider(),
+              ListTile(
+                leading: const Icon(
+                  Icons.logout,
+                  color: Colors.red,
+                ),
+                title: const Text(
+                  'Logout',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  signOut(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+
+              Text(
+                'Hello, $userName!',
+                style: const TextStyle(
+                  fontSize: 27,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkText,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              const Text(
+                'Manage your work and stay organized.',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: AppColors.grayText,
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.work_outline,
+                      color: Colors.white,
+                      size: 38,
+                    ),
+                    SizedBox(height: 18),
+                    Text(
+                      'Welcome to Aqilexa',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Your personal work management space.',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              const Text(
+                'Quick Access',
+                style: TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkText,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: DashboardCard(
+                      title: 'My Notes',
+                      subtitle: 'Manage your notes',
+                      icon: Icons.note_alt_outlined,
+                      color: AppColors.lightTeal,
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.notes,
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: DashboardCard(
+                      title: 'Upload',
+                      subtitle: 'Upload images',
+                      icon: Icons.cloud_upload_outlined,
+                      color: AppColors.accentTeal,
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.upload,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 14),
+
+              DashboardCard(
+                title: 'My Profile',
+                subtitle: 'View and update your profile',
+                icon: Icons.account_circle_outlined,
+                color: AppColors.brownAccent,
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.profile,
+                  );
+                },
+              ),
+
+              const SizedBox(height: 25),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DashboardCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const DashboardCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.white,
+      elevation: 2,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                backgroundColor: color.withValues(alpha: 0.25),
+                child: Icon(icon, color: AppColors.primary),
+              ),
+              const SizedBox(height: 15),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                  color: AppColors.darkText,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.grayText,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\screens\login_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\screens\login_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\screens\login_screen.dart
+==================================================
+
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../auth/auth_service.dart';
+import '../routes/app_routes.dart';
+import '../theme/app_colors.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/custom_textfield.dart';
+import '../widgets/password_field.dart';
+import '../widgets/social_login_button.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final AuthService authService = AuthService();
+
+  final TextEditingController emailController =
+      TextEditingController();
+
+  final TextEditingController passwordController =
+      TextEditingController();
+
+  bool isLoading = false;
+  bool isGoogleLoading = false;
+
+  Future<void> login() async {
+    if (emailController.text.trim().isEmpty ||
+        passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter email and password'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      await authService.signIn(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+    } on AuthException catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: $error')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  Future<void> googleLogin() async {
+    setState(() => isGoogleLoading = true);
+
+    try {
+      await authService.signInWithGoogle();
+    } on AuthException catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Login Error: $error')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isGoogleLoading = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 45),
+
+              const Center(
+                child: Icon(
+                  Icons.work_outline,
+                  size: 75,
+                  color: AppColors.primary,
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              const Center(
+                child: Text(
+                  'Welcome Back!',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              const Center(
+                child: Text(
+                  'Login to continue to Aqilexa',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: AppColors.grayText,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              const Text(
+                'Email Address',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              CustomTextField(
+                hintText: 'Enter your email',
+                controller: emailController,
+                prefixIcon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+              ),
+
+              const SizedBox(height: 22),
+
+              const Text(
+                'Password',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              PasswordField(
+                controller: passwordController,
+                hintText: 'Enter your password',
+              ),
+
+              const SizedBox(height: 10),
+
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.forgotPassword,
+                    );
+                  },
+                  child: const Text('Forgot Password?'),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              CustomButton(
+                text: 'Login',
+                isLoading: isLoading,
+                onPressed: login,
+              ),
+
+              const SizedBox(height: 25),
+
+              const Row(
+                children: [
+                  Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      'OR',
+                      style: TextStyle(
+                        color: AppColors.grayText,
+                      ),
+                    ),
+                  ),
+                  Expanded(child: Divider()),
+                ],
+              ),
+
+              const SizedBox(height: 25),
+
+              SocialLoginButton(
+                text: isGoogleLoading
+                    ? 'Connecting...'
+                    : 'Continue with Google',
+                icon: Icons.g_mobiledata,
+                onPressed: isGoogleLoading ? () {} : googleLogin,
+              ),
+
+              const SizedBox(height: 30),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Don't have an account?"),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.signup,
+                      );
+                    },
+                    child: const Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\screens\note_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\screens\note_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\screens\note_screen.dart
+==================================================
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\screens\profile_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\screens\profile_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\screens\profile_screen.dart
+==================================================
+
+import 'package:flutter/material.dart';
+
+import '../auth/auth_service.dart';
+import '../services/profile_service.dart';
+import '../services/upload_service.dart';
+import '../theme/app_colors.dart';
+import '../widgets/custom_button.dart';
+import 'upload_screen.dart';
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final ProfileService profileService = ProfileService();
+  final UploadService uploadService = UploadService();
+
+  final nameController = TextEditingController();
+
+  Map<String, dynamic>? profile;
+  bool isLoading = true;
+  bool isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadProfile();
+  }
+
+  Future<void> loadProfile() async {
+    try {
+      final result = await profileService.getProfile();
+
+      if (!mounted) return;
+
+      setState(() {
+        profile = result;
+        nameController.text =
+            result?['name']?.toString() ??
+            AuthService().currentUser?.userMetadata?['name']?.toString() ??
+            '';
+        isLoading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Profile loading failed: $error')),
+      );
+    }
+  }
+
+  Future<void> saveProfile() async {
+    if (nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your name')),
+      );
+      return;
+    }
+
+    setState(() {
+      isSaving = true;
+    });
+
+    try {
+      await profileService.updateProfile(
+        name: nameController.text.trim(),
+      );
+
+      await loadProfile();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile updated successfully'),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Update failed: $error')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSaving = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = AuthService().currentUser;
+
+    final imageUrl = profile?['avatar_url']?.toString();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'My Profile',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 20),
+
+                    CircleAvatar(
+                      radius: 65,
+                      backgroundColor: AppColors.lightTeal,
+                      backgroundImage:
+                          imageUrl != null && imageUrl.isNotEmpty
+                              ? NetworkImage(imageUrl)
+                              : null,
+                      child: imageUrl == null || imageUrl.isEmpty
+                          ? const Icon(
+                              Icons.person,
+                              size: 70,
+                              color: AppColors.primary,
+                            )
+                          : null,
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    TextButton.icon(
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const UploadScreen(),
+                          ),
+                        );
+
+                        await loadProfile();
+                      },
+                      icon: const Icon(Icons.camera_alt_outlined),
+                      label: const Text('Change Profile Image'),
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Full Name',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter your name',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Email Address',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    TextFormField(
+                      initialValue: user?.email ?? '',
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    CustomButton(
+                      text: 'Save Changes',
+                      isLoading: isSaving,
+                      onPressed: saveProfile,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Text(
+                      'Your profile information is stored securely.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.grayText,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\screens\reset_password_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\screens\reset_password_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\screens\reset_password_screen.dart
+==================================================
+
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../theme/app_colors.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/password_field.dart';
+
+class ResetPasswordScreen extends StatefulWidget {
+  const ResetPasswordScreen({super.key});
+
+  @override
+  State<ResetPasswordScreen> createState() =>
+      _ResetPasswordScreenState();
+}
+
+class _ResetPasswordScreenState
+    extends State<ResetPasswordScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  bool isLoading = false;
+
+  Future<void> updatePassword() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await Supabase.instance.client.auth.updateUser(
+        UserAttributes(
+          password: passwordController.text,
+        ),
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password updated successfully'),
+        ),
+      );
+
+      Navigator.of(context).popUntil(
+        (route) => route.isFirst,
+      );
+    } on AuthException catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password update failed: $error'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Reset Password'),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 30),
+
+                const Center(
+                  child: Icon(
+                    Icons.lock_reset,
+                    size: 85,
+                    color: AppColors.primary,
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                const Text(
+                  'Create New Password',
+                  style: TextStyle(
+                    fontSize: 27,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                const Text(
+                  'Enter your new password and confirm it.',
+                  style: TextStyle(
+                    color: AppColors.grayText,
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                const Text('New Password'),
+
+                const SizedBox(height: 8),
+
+                PasswordField(
+                  controller: passwordController,
+                  hintText: 'Enter new password',
+                  validator: (value) {
+                    if (value == null || value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                const Text('Confirm New Password'),
+
+                const SizedBox(height: 8),
+
+                PasswordField(
+                  controller: confirmPasswordController,
+                  hintText: 'Confirm new password',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm your password';
+                    }
+
+                    if (value != passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 30),
+
+                CustomButton(
+                  text: 'Update Password',
+                  isLoading: isLoading,
+                  onPressed: updatePassword,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\screens\setup_required_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\screens\setup_required_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\screens\setup_required_screen.dart
+==================================================
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\screens\signup_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\screens\signup_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\screens\signup_screen.dart
+==================================================
+
+import 'package:flutter/material.dart';
+
+import '../auth/auth_service.dart';
+import '../theme/app_colors.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/custom_textfield.dart';
+import '../widgets/password_field.dart';
+
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
+
+  @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
+  final AuthService authService = AuthService();
+
+  final _formKey = GlobalKey<FormState>();
+
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  bool isLoading = false;
+
+  Future<void> register() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final response = await authService.signUp(
+        name: nameController.text.trim(),
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      if (response.session != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created successfully'),
+          ),
+        );
+
+        Navigator.popUntil(context, (route) => route.isFirst);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Account created. Please check your email to verify your account.',
+            ),
+          ),
+        );
+
+        Navigator.pop(context);
+      }
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Registration failed: $error'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Create Account'),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 15),
+
+                const Text(
+                  'Create your account',
+                  style: TextStyle(
+                    fontSize: 27,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                const Text(
+                  'Sign up to start managing your work.',
+                  style: TextStyle(
+                    color: AppColors.grayText,
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                const Text('Full Name'),
+                const SizedBox(height: 8),
+
+                CustomTextField(
+                  hintText: 'Enter your name',
+                  controller: nameController,
+                  prefixIcon: Icons.person_outline,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your name';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 18),
+
+                const Text('Email'),
+                const SizedBox(height: 8),
+
+                CustomTextField(
+                  hintText: 'Enter your email',
+                  controller: emailController,
+                  prefixIcon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your email';
+                    }
+
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$')
+                        .hasMatch(value.trim())) {
+                      return 'Enter a valid email';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 18),
+
+                const Text('Password'),
+                const SizedBox(height: 8),
+
+                PasswordField(
+                  controller: passwordController,
+                  validator: (value) {
+                    if (value == null || value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 18),
+
+                const Text('Confirm Password'),
+                const SizedBox(height: 8),
+
+                PasswordField(
+                  hintText: 'Confirm your password',
+                  controller: confirmPasswordController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm your password';
+                    }
+
+                    if (value != passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 28),
+
+                CustomButton(
+                  text: 'Create Account',
+                  isLoading: isLoading,
+                  onPressed: register,
+                ),
+
+                const SizedBox(height: 20),
+
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      'Already have an account? Login',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\screens\upload_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\screens\upload_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\screens\upload_screen.dart
+==================================================
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\screens\welcome_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\screens\welcome_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\screens\welcome_screen.dart
+==================================================
+
+import 'package:flutter/material.dart';
+
+import '../theme/app_colors.dart';
+import '../widgets/custom_button.dart';
+import 'login_screen.dart';
+import 'signup_screen.dart';
+
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(),
+
+              Container(
+                height: 180,
+                width: 180,
+                decoration: BoxDecoration(
+                  color: AppColors.lightTeal,
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                child: const Icon(
+                  Icons.task_alt,
+                  size: 90,
+                  color: AppColors.primary,
+                ),
+              ),
+
+              const SizedBox(height: 35),
+
+              const Text(
+                'Welcome to Aqilexa',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkText,
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              const Text(
+                'Manage your work, notes and files in one place.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: AppColors.grayText,
+                ),
+              ),
+
+              const Spacer(),
+
+              CustomButton(
+                text: 'Create Account',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SignupScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 14),
+
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text('Login'),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\services\note_service.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\services\note_service.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\services\note_service.dart
+==================================================
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'supabase_service.dart';
+
+class NoteService {
+  final SupabaseClient supabase = SupabaseService.client;
+
+  // Read notes in real time
+  Stream<List<Map<String, dynamic>>> getNotes() {
+    final userId = SupabaseService.currentUserId;
+
+    if (userId == null) {
+      return Stream.value([]);
+    }
+
+    return supabase
+        .from('notes')
+        .stream(primaryKey: ['id'])
+        .eq('uuid', userId)
+        .order('created_at', ascending: false);
+  }
+
+  // Create note
+  Future<void> addNote({
+    required String title,
+    required String description,
+  }) async {
+    final userId = SupabaseService.currentUserId;
+
+    if (userId == null) {
+      throw Exception('User is not logged in');
+    }
+
+    await supabase.from('notes').insert({
+      'uuid': userId,
+      'title': title,
+      'description': description,
+    });
+  }
+
+  // Update note
+  Future<void> updateNote({
+    required int noteId,
+    required String title,
+    required String description,
+  }) async {
+    await supabase
+        .from('notes')
+        .update({
+          'title': title,
+          'description': description,
+        })
+        .eq('id', noteId)
+        .eq('uuid', SupabaseService.currentUserId!);
+  }
+
+  // Delete note
+  Future<void> deleteNote(int noteId) async {
+    await supabase
+        .from('notes')
+        .delete()
+        .eq('id', noteId)
+        .eq('uuid', SupabaseService.currentUserId!);
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\services\profile_service.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\services\profile_service.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\services\profile_service.dart
+==================================================
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'supabase_service.dart';
+
+class ProfileService {
+  final SupabaseClient supabase = SupabaseService.client;
+
+  // Get profile information
+  Future<Map<String, dynamic>?> getProfile() async {
+    final userId = SupabaseService.currentUserId;
+
+    if (userId == null) {
+      throw Exception('User is not logged in');
+    }
+
+    final response = await supabase
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .maybeSingle();
+
+    return response;
+  }
+
+  // Update profile name
+  Future<void> updateProfile({
+    required String name,
+  }) async {
+    final user = SupabaseService.currentUser;
+
+    if (user == null) {
+      throw Exception('User is not logged in');
+    }
+
+    await supabase.from('profiles').upsert({
+      'id': user.id,
+      'name': name,
+      'email': user.email,
+    });
+
+    await supabase.auth.updateUser(
+      UserAttributes(
+        data: {'name': name},
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\services\supabase_service.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\services\supabase_service.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\services\supabase_service.dart
+==================================================
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class SupabaseService {
+  static final SupabaseClient client =
+      Supabase.instance.client;
+
+  static User? get currentUser {
+    return client.auth.currentUser;
+  }
+
+  static String? get currentUserId {
+    return currentUser?.id;
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\services\upload_screen.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\services\upload_screen.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\services\upload_screen.dart
+==================================================
+
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../services/upload_service.dart';
+import '../theme/app_colors.dart';
+import '../widgets/custom_button.dart';
+
+class UploadScreen extends StatefulWidget {
+  const UploadScreen({super.key});
+
+  @override
+  State<UploadScreen> createState() => _UploadScreenState();
+}
+
+class _UploadScreenState extends State<UploadScreen> {
+  final UploadService uploadService = UploadService();
+
+  XFile? selectedImage;
+  String? uploadedImageUrl;
+
+  bool isLoading = false;
+  bool isFetching = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadProfileImage();
+  }
+
+  // Load existing profile image
+  Future<void> loadProfileImage() async {
+    try {
+      final imageUrl = await uploadService.getProfileImage();
+
+      if (!mounted) return;
+
+      setState(() {
+        uploadedImageUrl = imageUrl;
+        isFetching = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        isFetching = false;
+      });
+    }
+  }
+
+  // Pick image from gallery
+  Future<void> selectImage() async {
+    try {
+      final image = await uploadService.pickImage();
+
+      if (image == null || !mounted) return;
+
+      setState(() {
+        selectedImage = image;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Image selection failed: $error')),
+      );
+    }
+  }
+
+  // Upload selected image
+  Future<void> uploadImage() async {
+    if (selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an image first'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final imageUrl =
+          await uploadService.uploadImage(selectedImage!);
+
+      if (!mounted) return;
+
+      setState(() {
+        uploadedImageUrl = imageUrl;
+        selectedImage = null;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Image uploaded successfully'),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Upload failed: $error')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Upload Image',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+
+              const Text(
+                'Profile Image',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkText,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              const Text(
+                'Select an image from your gallery and upload it.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.grayText,
+                ),
+              ),
+
+              const SizedBox(height: 35),
+
+              Container(
+                width: 230,
+                height: 230,
+                decoration: BoxDecoration(
+                  color: AppColors.lightTeal,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: selectedImage != null
+                    ? FutureBuilder<Uint8List>(
+                        future: selectedImage!.readAsBytes(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Image.memory(
+                              snapshot.data!,
+                              fit: BoxFit.cover,
+                            );
+                          }
+
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                      )
+                    : isFetching
+                        ? const Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : uploadedImageUrl != null
+                            ? Image.network(
+                                uploadedImageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stack) {
+                                  return const Icon(
+                                    Icons.broken_image_outlined,
+                                    size: 75,
+                                    color: AppColors.primary,
+                                  );
+                                },
+                              )
+                            : const Icon(
+                                Icons.image_outlined,
+                                size: 85,
+                                color: AppColors.primary,
+                              ),
+              ),
+
+              const SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: isLoading ? null : selectImage,
+                  icon: const Icon(Icons.photo_library_outlined),
+                  label: const Text('Choose from Gallery'),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              CustomButton(
+                text: 'Upload Image',
+                isLoading: isLoading,
+                onPressed: uploadImage,
+              ),
+
+              const SizedBox(height: 20),
+
+              if (selectedImage != null)
+                const Text(
+                  'New image selected. Upload to save it.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\services\upload_service.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\services\upload_service.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\services\upload_service.dart
+==================================================
+
+import 'dart:typed_data';
+
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'supabase_service.dart';
+
+class UploadService {
+  final SupabaseClient supabase = SupabaseService.client;
+
+  final ImagePicker imagePicker = ImagePicker();
+
+  // Select image from gallery
+  Future<XFile?> pickImage() async {
+    return await imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+  }
+
+  // Upload image to Supabase Storage
+  Future<String> uploadImage(XFile image) async {
+    final userId = SupabaseService.currentUserId;
+
+    if (userId == null) {
+      throw Exception('User is not logged in');
+    }
+
+    final Uint8List imageBytes = await image.readAsBytes();
+
+    final String filePath =
+        '$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    await supabase.storage
+        .from('images')
+        .uploadBinary(
+          filePath,
+          imageBytes,
+          fileOptions: const FileOptions(
+            contentType: 'image/jpeg',
+            upsert: true,
+          ),
+        );
+
+    // Get public image URL
+    final String imageUrl = supabase.storage
+        .from('images')
+        .getPublicUrl(filePath);
+
+    // Save image URL in profiles table
+    await supabase.from('profiles').upsert({
+      'id': userId,
+      'email': SupabaseService.currentUser?.email,
+      'name': SupabaseService.currentUser?.userMetadata?['name'],
+      'avatar_url': imageUrl,
+    });
+
+    return imageUrl;
+  }
+
+  // Get profile image URL
+  Future<String?> getProfileImage() async {
+    final userId = SupabaseService.currentUserId;
+
+    if (userId == null) return null;
+
+    final response = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', userId)
+        .maybeSingle();
+
+    return response?['avatar_url']?.toString();
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\theme\app_colors.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\theme\app_colors.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\theme\app_colors.dart
+==================================================
+
+import 'package:flutter/material.dart';
+
+class AppColors {
+  static const Color background = Color(0xFFF1F7F8);
+  static const Color primary = Color(0xFF046F7C);
+  static const Color lightTeal = Color(0xFF9CDCE0);
+  static const Color accent = Color(0xFF56BEC8);
+
+  static const Color darkText = Color(0xFF151515);
+  static const Color grayText = Color(0xFF9EA1A0);
+  static const Color white = Colors.white;
+  static const Color brown = Color(0xFFA56B56);
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\theme\app_theme.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\theme\app_theme.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\theme\app_theme.dart
+==================================================
+
+import 'package:flutter/material.dart';
+import 'app_colors.dart';
+
+class AppTheme {
+  static ThemeData lightTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    scaffoldBackgroundColor: AppColors.background,
+    primaryColor: AppColors.primary,
+
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      brightness: Brightness.light,
+    ),
+
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.background,
+      foregroundColor: AppColors.darkText,
+      elevation: 0,
+      centerTitle: false,
+    ),
+
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.white,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 16,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: AppColors.primary,
+          width: 1.5,
+        ),
+      ),
+    ),
+
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
+        minimumSize: const Size(double.infinity, 52),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    ),
+  );
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\utils\app_constants.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\utils\app_constants.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\utils\app_constants.dart
+==================================================
+
+class AppConstants {
+  static const String appName = 'Aqilexa';
+
+  static const String appDescription =
+      'Work Management Application';
+
+  static const String appVersion = '1.0.0';
+
+  // Supabase table names
+  static const String profilesTable = 'profiles';
+  static const String notesTable = 'notes';
+
+  // Supabase storage bucket
+  static const String imageBucket = 'images';
+
+  // Authentication
+  static const int minimumPasswordLength = 6;
+
+  // Screen titles
+  static const String welcomeTitle = 'Welcome to Aqilexa';
+  static const String loginTitle = 'Login';
+  static const String signupTitle = 'Create Account';
+  static const String homeTitle = 'Dashboard';
+  static const String notesTitle = 'My Notes';
+  static const String profileTitle = 'My Profile';
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\utils\app_validators.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\utils\app_validators.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\utils\app_validators.dart
+==================================================
+
+class AppValidators {
+  static String? validateName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your name';
+    }
+
+    if (value.trim().length < 3) {
+      return 'Name must contain at least 3 characters';
+    }
+
+    return null;
+  }
+
+  static String? validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your email';
+    }
+
+    final emailRegex =
+        RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
+
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'Please enter a valid email address';
+    }
+
+    return null;
+  }
+
+  static String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    }
+
+    if (value.length < 6) {
+      return 'Password must contain at least 6 characters';
+    }
+
+    return null;
+  }
+
+  static String? validateConfirmPassword(
+    String? value,
+    String password,
+  ) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+
+    if (value != password) {
+      return 'Passwords do not match';
+    }
+
+    return null;
+  }
+
+  static String? validateRequired(
+    String? value,
+    String fieldName,
+  ) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName is required';
+    }
+
+    return null;
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\widgets\custom_button.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\widgets\custom_button.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\widgets\custom_button.dart
+==================================================
+
+import 'package:flutter/material.dart';
+
+import '../theme/app_colors.dart';
+
+class CustomButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+  final bool isLoading;
+
+  const CustomButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: isLoading
+            ? const CircularProgressIndicator(
+                color: AppColors.white,
+              )
+            : Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\widgets\custom_textfield.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\widgets\custom_textfield.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\widgets\custom_textfield.dart
+==================================================
+
+import 'package:flutter/material.dart';
+
+class CustomTextField extends StatelessWidget {
+  final String hintText;
+  final TextEditingController controller;
+  final IconData? prefixIcon;
+  final TextInputType keyboardType;
+  final bool obscureText;
+  final String? Function(String?)? validator;
+
+  const CustomTextField({
+    super.key,
+    required this.hintText,
+    required this.controller,
+    this.prefixIcon,
+    this.keyboardType = TextInputType.text,
+    this.obscureText = false,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      validator: validator,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: prefixIcon == null
+            ? null
+            : Icon(prefixIcon),
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\widgets\empty_state.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\widgets\empty_state.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\widgets\empty_state.dart
+==================================================
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\widgets\loading_widget.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\widgets\loading_widget.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\widgets\loading_widget.dart
+==================================================
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\widgets\password_field.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\widgets\password_field.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\widgets\password_field.dart
+==================================================
+
+import 'package:flutter/material.dart';
+
+class PasswordField extends StatefulWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final String? Function(String?)? validator;
+
+  const PasswordField({
+    super.key,
+    required this.controller,
+    this.hintText = 'Password',
+    this.validator,
+  });
+
+  @override
+  State<PasswordField> createState() => _PasswordFieldState();
+}
+
+class _PasswordFieldState extends State<PasswordField> {
+  bool isVisible = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: widget.controller,
+      obscureText: !isVisible,
+      validator: widget.validator,
+      decoration: InputDecoration(
+        hintText: widget.hintText,
+        prefixIcon: const Icon(Icons.lock_outline),
+        suffixIcon: IconButton(
+          onPressed: () {
+            setState(() {
+              isVisible = !isVisible;
+            });
+          },
+          icon: Icon(
+            isVisible ? Icons.visibility : Icons.visibility_off,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+E:\myapp311>(
+echo..  
+ echo ==================================================  
+ echo FILE: E:\myapp311\lib\widgets\social_login_button.dart  
+ echo ==================================================  
+ type "E:\myapp311\lib\widgets\social_login_button.dart" 
+) 
+.
+==================================================
+FILE: E:\myapp311\lib\widgets\social_login_button.dart
+==================================================
+
+import 'package:flutter/material.dart';
+
+class SocialLoginButton extends StatelessWidget {
+  final String text;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const SocialLoginButton({
+    super.key,
+    required this.text,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        label: Text(text),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.black87,
+          side: const BorderSide(color: Colors.black12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+}
